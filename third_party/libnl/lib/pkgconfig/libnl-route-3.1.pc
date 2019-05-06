@@ -1,0 +1,11 @@
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libnl-route
+Description: Netlink Routing Family Library
+Version: 3.1
+Requires: libnl
+Libs: -L${libdir} -lnl-route
+Cflags: -I${includedir}

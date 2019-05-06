@@ -17,6 +17,7 @@
 
 #include "platform.h"
 
+
 #ifdef __cplusplus
 #if __cplusplus
 extern "C" {
@@ -27,9 +28,11 @@ extern "C" {
 #define  LOG_TAG        "WIFI"
    
 #define _LOG_NONE_		 0x00
-#define _LOG_DRIVER_     0x01
-#define _LOG_LOGIC_	     0x02
-#define _LOG_RESULT_     0x04
+#define _LOG_COMMON_     0x01
+#define _LOG_DRIVER_     0x02
+#define _LOG_LOGIC_	     0x04
+#define _LOG_RESULT_     0x08
+#define _LOG_CORE_       0x10
 
 
 #define COLOR_NONE                 "\e[0m"
@@ -103,7 +106,7 @@ void log_set_filepath(char* path);
 void log_write(unsigned int level,const char *fmt, ...);
 
 
-#ifdef _BUILD_FOR_LINUX_
+#if defined(_LINUX_)
 #include <sys/time.h>
 
 #define LOG(level,color,...) \
@@ -114,18 +117,10 @@ void log_write(unsigned int level,const char *fmt, ...);
 			printf(__VA_ARGS__);printf("\n");\
             printf(COLOR_WHITE);}   
 
-#define LOGD(level,...) LOG(level,COLOR_GREEN,__VA_ARGS__)
-
+#define LOGI(level,...) LOG(level,COLOR_YELLOW,__VA_ARGS__)
+#define LOGD(level,...) LOG(level,COLOR_L_BLUE,__VA_ARGS__)
 #define LOGE(level,...) LOG(level,COLOR_RED,__VA_ARGS__)
-                
 #endif
-
-#ifdef _BUILD_FOR_ANDROID_
-#define LOGD(level,...) \
-        log_write(level,__VA_ARGS__);\
-        if(log_get_level()&level) __android_log_print(ANDROID_LOG_DEBUG,LOG_TAG,__VA_ARGS__)
-#endif
-
 
 #ifdef __cplusplus
 #if __cplusplus

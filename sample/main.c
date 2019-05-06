@@ -14,10 +14,8 @@
 *********************************************************/
 #include "config.h"
 #include "log.h"
-#include "driver.h"
+#include "netfilter.h"
 
-
-PDriverHandle mDriverHandle = NULL;
 
 /*************************************************
  Function:		main
@@ -32,15 +30,12 @@ PDriverHandle mDriverHandle = NULL;
 int main(int argc,char *argv[])  
 { 
     int i = 10;
-    LOGD(_LOG_LOGIC_, "**************************************************");
-    LOGD(_LOG_LOGIC_, "Build Version: %s",_BUILD_VERSION_);
-    LOGD(_LOG_LOGIC_, "Build Time   : %s",_BUILD_TIME_);
-    LOGD(_LOG_LOGIC_, "**************************************************");
+    LOGI(_LOG_LOGIC_, "**************************************************");
+    LOGI(_LOG_LOGIC_, "Build Version: %s",_BUILD_VERSION_);
+    LOGI(_LOG_LOGIC_, "Build Time   : %s",_BUILD_TIME_);
+    LOGI(_LOG_LOGIC_, "**************************************************");    
 
-    mDriverHandle = DriverInit();
-    LibUsb_ScanDevice(mDriverHandle);
-    LibUsb_ListDevice(mDriverHandle);
-    DriverDeInit(mDriverHandle);
+    netfilter_init();
     
     return 0;
 }

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
 project (WiFiTool)
-ADD_SUBDIRECTORY(driver)
 ADD_SUBDIRECTORY(library)
+ADD_SUBDIRECTORY(core)
 ADD_SUBDIRECTORY(sample)

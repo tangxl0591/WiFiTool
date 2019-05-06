@@ -1,0 +1,11 @@
+prefix=/usr/local
+exec_prefix=${prefix}
+libdir=${exec_prefix}/lib
+includedir=${prefix}/include
+
+Name: libnl-genl
+Description: Generic Netlink Library
+Version: 3.1
+Requires: libnl
+Libs: -L${libdir} -lnl-genl
+Cflags: -I${includedir}

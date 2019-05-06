@@ -2,5 +2,7 @@ INCLUDE(${WiFiTool_SOURCE_DIR}/config/WiFiConfig.cmake)
 
 SET(LOG_SRC_LIST log.c )
 
-ADD_LIBRARY(log SHARED ${LOG_SRC_LIST})
+ADD_LIBRARY(log STATIC ${LOG_SRC_LIST})
+
+set(CMAKE_C_FLAGS "-fPIC ${CMAKE_C_FLAGS}") 
 
