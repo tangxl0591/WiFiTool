@@ -1,6 +1,6 @@
 /*********************************************************
  Copyright (C),2015-2021,Electronic Technology Co.,Ltd.
- File name: 		netfilter.h
+ File name: 		net_core.h
  Author: 			Txl
  Version: 			1.0
  Date: 				2018-10-17
@@ -27,11 +27,14 @@
 #include <linux/genetlink.h>
 #endif // CONFIG_LIBNL
 
+#include "log.h"
 #include "byteorder.h"
 #include "packed.h"
-#include "netfilter_utils.h"
+#include "net_utils.h"
 #include "nl80211.h"
-#include "log.h"
+#ifdef _LINUX_
+#include "net_linux.h"
+#endif
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -67,7 +70,7 @@ struct rx_info
 	uint32_t ri_antenna;
 } __packed;
 
-struct netfilter
+struct netcore
 {   
     int debug;
     int wi_id;
@@ -76,43 +79,35 @@ struct netfilter
 	void * priv;
 	char interface[IFNAMSIZ];  
 
-   	int (*wi_read)(struct netfilter * filter,
+    int (*wi_get_fd)(struct netcore * filter);
+    
+   	int (*wi_read)(struct netcore * filter,
 				   unsigned char * h80211,
 				   int len,
 				   struct rx_info * ri);
-	int (*wi_write)(struct netfilter * filter,
+	int (*wi_write)(struct netcore * filter,
 					unsigned char * h80211,
 					int len,
 					struct tx_info * ti);
-	int (*wi_set_ht_channel)(struct netfilter * filter, int chan, unsigned int htval);
-	int (*wi_set_channel)(struct netfilter * filter, int chan);
-	int (*wi_get_channel)(struct netfilter * filter);
-	int (*wi_set_freq)(struct netfilter * filter, int freq);
-	int (*wi_get_freq)(struct netfilter * filter);
-	void (*wi_close)(struct netfilter * filter);
-	int (*wi_get_mac)(struct netfilter * filter, unsigned char * mac);
-	int (*wi_set_mac)(struct netfilter * filter, unsigned char * mac);
-	int (*wi_set_rate)(struct netfilter * filter, int rate);
-	int (*wi_get_rate)(struct netfilter * filter);
-	int (*wi_set_txpower)(struct netfilter * filter, int rate);
-	int (*wi_get_txpower)(struct netfilter * filter);    
- 	int (*wi_set_mtu)(struct netfilter * filter, int mtu);
-	int (*wi_get_mtu)(struct netfilter * filter);
+	int (*wi_set_ht_channel)(struct netcore * filter, int chan, unsigned int htval);
+	int (*wi_set_channel)(struct netcore * filter, int chan);
+	int (*wi_get_channel)(struct netcore * filter);
+	int (*wi_set_freq)(struct netcore * filter, int freq);
+	int (*wi_get_freq)(struct netcore * filter);
+	void (*wi_close)(struct netcore * filter);
+	int (*wi_get_mac)(struct netcore * filter, unsigned char * mac);
+	int (*wi_set_mac)(struct netcore * filter, unsigned char * mac);
+	int (*wi_set_rate)(struct netcore * filter, int rate);
+	int (*wi_get_rate)(struct netcore * filter);
+	int (*wi_set_txpower)(struct netcore * filter, int rate);
+	int (*wi_get_txpower)(struct netcore * filter);    
+ 	int (*wi_set_mtu)(struct netcore * filter, int mtu);
+	int (*wi_get_mtu)(struct netcore * filter);
 
-	int (*wi_get_monitor)(struct netfilter * filter);
-    int (*wi_set_monitor)(struct netfilter * filter);
+	int (*wi_get_monitor)(struct netcore * filter);
+    int (*wi_set_monitor)(struct netcore * filter);
 
 };
-
-/*************************************************
- Function:		netfilter_init
- Descroption:	 
- Input: 		None
- Output: 
- Return: 	
- Other:  
-*************************************************/
-int netfilter_init(void);
 
 #ifdef __cplusplus
 #if __cplusplus

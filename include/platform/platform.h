@@ -30,6 +30,7 @@
 #include <poll.h>
 #include <semaphore.h>
 #include <dlfcn.h>
+#include <dirent.h>
 #endif
 
 #include "log.h"

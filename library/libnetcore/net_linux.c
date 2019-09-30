@@ -1,6 +1,6 @@
 /*********************************************************
  Copyright (C),2015-2021,Electronic Technology Co.,Ltd.
- File name: 		netfilter_linux.c
+ File name: 		net_linux.c
  Author: 			Txl
  Version: 			1.0
  Date: 				2018-12-27
@@ -35,13 +35,12 @@
 #include <net/if_arp.h>
 #include <limits.h>
 
-#include "netfilter_linux.h"
+#include "net_linux.h"
 #include "radiotap.h"
 #include "radiotap_iter.h"
-#include "airodump-ng.h"
 
 /*************************************************
- Function:		netfilter_error_handler
+ Function:		net_error_handler
  Descroption:	 
  Input: 
 	1.sockaddr_nl *nla
@@ -51,7 +50,7 @@
  Return: 	
  Other:  
 *************************************************/
-static int netfilter_error_handler(struct sockaddr_nl *nla, struct nlmsgerr *err,
+static int net_error_handler(struct sockaddr_nl *nla, struct nlmsgerr *err,
 			 void *arg)
 {
 	int *ret = arg;
@@ -61,7 +60,7 @@ static int netfilter_error_handler(struct sockaddr_nl *nla, struct nlmsgerr *err
 }
 
 /*************************************************
- Function:		netfilter_finish_handler
+ Function:		net_finish_handler
  Descroption:	 
  Input: 
 	1.nl_msg *msg
@@ -70,7 +69,7 @@ static int netfilter_error_handler(struct sockaddr_nl *nla, struct nlmsgerr *err
  Return: 	
  Other:  
 *************************************************/
-static int netfilter_finish_handler(struct nl_msg *msg, void *arg)
+static int net_finish_handler(struct nl_msg *msg, void *arg)
 {
 	int *ret = arg;
     LOGD(_LOG_DRIVER_,"%s===========================",__func__);  
@@ -79,7 +78,7 @@ static int netfilter_finish_handler(struct nl_msg *msg, void *arg)
 }
 
 /*************************************************
- Function:		netfilter_ack_handler
+ Function:		net_ack_handler
  Descroption:	 
  Input: 
 	1.nl_msg *msg
@@ -88,7 +87,7 @@ static int netfilter_finish_handler(struct nl_msg *msg, void *arg)
  Return: 	
  Other:  
 *************************************************/
-static int netfilter_ack_handler(struct nl_msg *msg, void *arg)
+static int net_ack_handler(struct nl_msg *msg, void *arg)
 {
 	int *ret = arg;
 	*ret = 0;
@@ -97,7 +96,7 @@ static int netfilter_ack_handler(struct nl_msg *msg, void *arg)
 }
 
 /*************************************************
- Function:		netfilter_valid_handler
+ Function:		net_valid_handler
  Descroption:	 
  Input: 
 	1.nl_msg *msg
@@ -106,7 +105,7 @@ static int netfilter_ack_handler(struct nl_msg *msg, void *arg)
  Return: 	
  Other:  
 *************************************************/
-static int netfilter_valid_handler(struct nl_msg *msg, void *arg)
+static int net_valid_handler(struct nl_msg *msg, void *arg)
 {
 	LOGD(_LOG_DRIVER_,"%s===========================",__func__);  
 	return NL_OK;
@@ -184,14 +183,14 @@ static void nl80211_cleanup(struct nl80211_state * state)
  Function:		linux_fd
  Descroption:	 
  Input: 
-	1.netfilter * filter
+	1.net * filter
  Output: 
  Return: 	
  Other:  
 *************************************************/
-static int linux_fd(struct netfilter * filter)
+static int linux_fd(struct netcore * filter)
 {
-	struct priv_linux * pl = netfilter_get_priv(filter);
+	struct priv_linux * pl = net_get_priv(filter);
 	return pl->fd_in;
 }
 
@@ -199,20 +198,20 @@ static int linux_fd(struct netfilter * filter)
  Function:		linux_get_freq
  Descroption:	 
  Input: 
-	1.netfilter * filter
+	1.net * filter
  Output: 
  Return: 	
  Other:  
 *************************************************/
-static int linux_get_freq(struct netfilter * filter)
+static int linux_get_freq(struct netcore * filter)
 {
-	struct priv_linux * dev = netfilter_get_priv(filter);
+	struct priv_linux * dev = net_get_priv(filter);
 	struct iwreq wrq;
 	int fd, frequency;
 
 	memset(&wrq, 0, sizeof(struct iwreq));
 
-	strncpy(wrq.ifr_name, netfilter_get_ifname(filter), IFNAMSIZ);
+	strncpy(wrq.ifr_name, net_get_ifname(filter), IFNAMSIZ);
 	wrq.ifr_name[IFNAMSIZ - 1] = 0;
 
 	fd = dev->fd_in;
@@ -234,23 +233,22 @@ static int linux_get_freq(struct netfilter * filter)
  Function:		linux_set_freq
  Descroption:	 
  Input: 
-	1.netfilter * filter
+	1.net * filter
 	2.freq
  Output: 
  Return: 	
  Other:  
 *************************************************/
-static int linux_set_freq(struct netfilter * filter, int freq)
+static int linux_set_freq(struct netcore * filter, int freq)
 {
-	struct priv_linux * dev = netfilter_get_priv(filter);
+	struct priv_linux * dev = net_get_priv(filter);
 	char s[32];
-	int pid, status, unused;
 	struct iwreq wrq;
 
 	memset(s, 0, sizeof(s));
 
 	memset(&wrq, 0, sizeof(struct iwreq));
-	strncpy(wrq.ifr_name, netfilter_get_ifname(filter), IFNAMSIZ);
+	strncpy(wrq.ifr_name, net_get_ifname(filter), IFNAMSIZ);
 	wrq.ifr_name[IFNAMSIZ - 1] = 0;
 
 	wrq.u.freq.m = (double) freq * 100000;
@@ -276,22 +274,22 @@ static int linux_set_freq(struct netfilter * filter, int freq)
  Function:		linux_get_mac
  Descroption:	 
  Input: 
-	1.netfilter * filter
+	1.net * filter
 	2.char * mac
  Output: 
  Return: 	
  Other:  
 *************************************************/
-static int linux_get_mac(struct netfilter * filter, unsigned char * mac)
+static int linux_get_mac(struct netcore * filter, unsigned char * mac)
 {
-	struct priv_linux * pl = netfilter_get_priv(filter);
+	struct priv_linux * pl = net_get_priv(filter);
 	struct ifreq ifr;
 	int fd;
 
 	fd = pl->fd_in;
 
 	memset(&ifr, 0, sizeof(ifr));
-	strncpy(ifr.ifr_name, netfilter_get_ifname(filter), sizeof(ifr.ifr_name) - 1);
+	strncpy(ifr.ifr_name, net_get_ifname(filter), sizeof(ifr.ifr_name) - 1);
 
 	if (ioctl(fd, SIOCGIFINDEX, &ifr) < 0)
 	{
@@ -317,22 +315,22 @@ static int linux_get_mac(struct netfilter * filter, unsigned char * mac)
  Function:		linux_set_mac
  Descroption:	 
  Input: 
-	1.netfilter * filter
+	1.net * filter
 	2.char * mac
  Output: 
  Return: 	
  Other:  
 *************************************************/
-static int linux_set_mac(struct netfilter * filter, unsigned char * mac)
+static int linux_set_mac(struct netcore * filter, unsigned char * mac)
 {
-	struct priv_linux * pl = netfilter_get_priv(filter);
+	struct priv_linux * pl = net_get_priv(filter);
 	struct ifreq ifr;
 	int fd, ret;
 
 	fd = linux_fd(filter);
 
 	memset(&ifr, 0, sizeof(ifr));
-	strncpy(ifr.ifr_name, netfilter_get_ifname(filter), sizeof(ifr.ifr_name) - 1);
+	strncpy(ifr.ifr_name, net_get_ifname(filter), sizeof(ifr.ifr_name) - 1);
 
 	if (ioctl(fd, SIOCGIFHWADDR, &ifr) < 0)
 	{
@@ -371,25 +369,24 @@ static int linux_set_mac(struct netfilter * filter, unsigned char * mac)
  Function:		linux_get_monitor
  Descroption:	 
  Input: 
-	1.netfilter * filter
+	1.net * filter
  Output: 
  Return: 	
  Other:  
 *************************************************/
-static int linux_get_monitor(struct netfilter * filter)
+static int linux_get_monitor(struct netcore * filter)
 {
-	struct priv_linux * dev = netfilter_get_priv(filter);
 	struct ifreq ifr;
 	struct iwreq wrq;
 
 	memset(&ifr, 0, sizeof(ifr));
     if(filter->monitor)
     {
-	    strncpy(ifr.ifr_name, netfilter_get_monname(filter), sizeof(ifr.ifr_name) - 1);
+	    strncpy(ifr.ifr_name, net_get_monname(filter), sizeof(ifr.ifr_name) - 1);
     }
     else
     {
-        strncpy(ifr.ifr_name, netfilter_get_ifname(filter), sizeof(ifr.ifr_name) - 1);
+        strncpy(ifr.ifr_name, net_get_ifname(filter), sizeof(ifr.ifr_name) - 1);
     }
     if( ioctl(linux_fd(filter), SIOCGIFINDEX, &ifr ) < 0 )
     {
@@ -406,11 +403,11 @@ static int linux_get_monitor(struct netfilter * filter)
 	memset(&wrq, 0, sizeof(struct iwreq));
     if(filter->monitor)
 	{
-	    strncpy(wrq.ifr_name, netfilter_get_monname(filter), IFNAMSIZ);
+	    strncpy(wrq.ifr_name, net_get_monname(filter), IFNAMSIZ);
     }
     else
     {
-        strncpy(wrq.ifr_name, netfilter_get_ifname(filter), IFNAMSIZ);
+        strncpy(wrq.ifr_name, net_get_ifname(filter), IFNAMSIZ);
     }
 	wrq.ifr_name[IFNAMSIZ - 1] = 0;
 
@@ -434,17 +431,16 @@ static int linux_get_monitor(struct netfilter * filter)
  Function:		nl80211_set_monitor
  Descroption:	 
  Input: 
-	1.netfilter * filter
+	1.net * filter
  Output: 
  Return: 	
  Other:  
 *************************************************/
-static int nl80211_set_monitor(struct netfilter * filter)
+static int nl80211_set_monitor(struct netcore * filter)
 {
     struct nl_cb *cb;
     struct nl_cb *s_cb;
     int err;
-    int ret;
     int flags = 0;
     struct nl80211_state * nl80211 = NULL;
     enum nl80211_commands cmd = NL80211_CMD_NEW_INTERFACE; 
@@ -457,7 +453,7 @@ static int nl80211_set_monitor(struct netfilter * filter)
     nl80211 = filter->n80211;
     if(NULL == nl80211)
     {
-        return -1;
+        goto out;
     }
     
     struct nl_msg* msg = nlmsg_alloc();
@@ -468,21 +464,21 @@ static int nl80211_set_monitor(struct netfilter * filter)
         nl_socket_set_cb(nl80211->nl_sock, s_cb);
     }
  
-    int ifIndex = netfilter_name_lookup_index(filter->interface);
+    int ifIndex = net_name_lookup_index(filter->interface);
 
     genlmsg_put(msg, 0, 0, genl_family_get_id(nl80211->nl80211), 0, flags, cmd, 0);
     NLA_PUT_U32(msg, NL80211_ATTR_IFINDEX, ifIndex);
     NLA_PUT_STRING(msg, NL80211_ATTR_IFNAME, MONITOR_NAME);
     NLA_PUT_U32(msg, NL80211_ATTR_IFTYPE, NL80211_IFTYPE_MONITOR);
 
-    ret = nl_send_auto_complete(nl80211->nl_sock, msg);
+    nl_send_auto_complete(nl80211->nl_sock, msg);
     if(filter->debug)
     {
         err = 1;
-    	nl_cb_err(cb, NL_CB_CUSTOM, netfilter_error_handler, &err);
-    	nl_cb_set(cb, NL_CB_FINISH, NL_CB_CUSTOM, netfilter_finish_handler, &err);
-    	nl_cb_set(cb, NL_CB_ACK, NL_CB_CUSTOM, netfilter_ack_handler, &err);
-    	nl_cb_set(cb, NL_CB_VALID, NL_CB_CUSTOM, netfilter_valid_handler, NULL);
+    	nl_cb_err(cb, NL_CB_CUSTOM, net_error_handler, &err);
+    	nl_cb_set(cb, NL_CB_FINISH, NL_CB_CUSTOM, net_finish_handler, &err);
+    	nl_cb_set(cb, NL_CB_ACK, NL_CB_CUSTOM, net_ack_handler, &err);
+    	nl_cb_set(cb, NL_CB_VALID, NL_CB_CUSTOM, net_valid_handler, NULL);
     }
 
 	while (err > 0)
@@ -505,16 +501,14 @@ nla_put_failure:
  Function:		linux_set_rate
  Descroption:	 
  Input: 
-	1.netfilter * filter
+	1.net * filter
 	2.rate
  Output: 
  Return: 	
  Other:  
 *************************************************/
-static int linux_set_rate(struct netfilter * filter, int rate)
+static int linux_set_rate(struct netcore * filter, int rate)
 {
-	struct priv_linux * pl = netfilter_get_priv(filter);
-	struct ifreq ifr;
 	struct iwreq wrq;
     int fd = linux_fd(filter);
 
@@ -522,11 +516,11 @@ static int linux_set_rate(struct netfilter * filter, int rate)
 
 	if(filter->monitor)
 	{
-	    strncpy(wrq.ifr_name, netfilter_get_monname(filter), IFNAMSIZ);
+	    strncpy(wrq.ifr_name, net_get_monname(filter), IFNAMSIZ);
     }
     else
     {
-        strncpy(wrq.ifr_name, netfilter_get_ifname(filter), IFNAMSIZ);
+        strncpy(wrq.ifr_name, net_get_ifname(filter), IFNAMSIZ);
     }
 	wrq.ifr_name[IFNAMSIZ - 1] = 0;
 
@@ -545,14 +539,13 @@ static int linux_set_rate(struct netfilter * filter, int rate)
  Function:		linux_get_rate
  Descroption:	 
  Input: 
-	1.netfilter * filter
+	1.net * filter
  Output: 
  Return: 	
  Other:  
 *************************************************/
-static int linux_get_rate(struct netfilter * filter)
+static int linux_get_rate(struct netcore * filter)
 {
-	struct priv_linux * pl = netfilter_get_priv(filter);
 	struct iwreq wrq;
     int fd = linux_fd(filter);
 
@@ -560,11 +553,11 @@ static int linux_get_rate(struct netfilter * filter)
 
 	if(filter->monitor)
 	{
-	    strncpy(wrq.ifr_name, netfilter_get_monname(filter), IFNAMSIZ);
+	    strncpy(wrq.ifr_name, net_get_monname(filter), IFNAMSIZ);
     }
     else
     {
-        strncpy(wrq.ifr_name, netfilter_get_ifname(filter), IFNAMSIZ);
+        strncpy(wrq.ifr_name, net_get_ifname(filter), IFNAMSIZ);
     }	
 	wrq.ifr_name[IFNAMSIZ - 1] = 0;
 
@@ -580,15 +573,15 @@ static int linux_get_rate(struct netfilter * filter)
  Function:		linux_set_txpower
  Descroption:	 
  Input: 
-	1.netfilter * filter
+	1.net * filter
 	2.power
  Output: 
  Return: 	
  Other:  
 *************************************************/
-static int linux_set_txpower(struct netfilter * filter, int power)
+static int linux_set_txpower(struct netcore * filter, int power)
 {
-	struct priv_linux * pl = netfilter_get_priv(filter);
+	struct priv_linux * pl = net_get_priv(filter);
 	struct iwreq wrq;
     int ret = -1;
     int fd = linux_fd(filter);
@@ -597,11 +590,11 @@ static int linux_set_txpower(struct netfilter * filter, int power)
 
     if(filter->monitor)
 	{
-	    strncpy(wrq.ifr_name, netfilter_get_monname(filter), IFNAMSIZ);
+	    strncpy(wrq.ifr_name, net_get_monname(filter), IFNAMSIZ);
     }
     else
     {
-        strncpy(wrq.ifr_name, netfilter_get_ifname(filter), IFNAMSIZ);
+        strncpy(wrq.ifr_name, net_get_ifname(filter), IFNAMSIZ);
     }
 
 	wrq.ifr_name[IFNAMSIZ - 1] = 0;
@@ -623,14 +616,13 @@ static int linux_set_txpower(struct netfilter * filter, int power)
  Function:		linux_get_txpower
  Descroption:	 
  Input: 
-	1.netfilter * filter
+	1.net * filter
  Output: 
  Return: 	
  Other:  
 *************************************************/
-static int linux_get_txpower(struct netfilter * filter)
+static int linux_get_txpower(struct netcore * filter)
 {
-	struct priv_linux * pl = netfilter_get_priv(filter);
 	struct iwreq wrq;
     int fd = linux_fd(filter);
 
@@ -638,11 +630,11 @@ static int linux_get_txpower(struct netfilter * filter)
 
     if(filter->monitor)
 	{
-	    strncpy(wrq.ifr_name, netfilter_get_monname(filter), IFNAMSIZ);
+	    strncpy(wrq.ifr_name, net_get_monname(filter), IFNAMSIZ);
     }
     else
     {
-        strncpy(wrq.ifr_name, netfilter_get_ifname(filter), IFNAMSIZ);
+        strncpy(wrq.ifr_name, net_get_ifname(filter), IFNAMSIZ);
     }
 	wrq.ifr_name[IFNAMSIZ - 1] = 0;
 
@@ -658,14 +650,13 @@ static int linux_get_txpower(struct netfilter * filter)
  Function:		linux_get_channel
  Descroption:	 
  Input: 
-	1.netfilter * filter
+	1.net * filter
  Output: 
  Return: 	
  Other:  
 *************************************************/
-static int linux_get_channel(struct netfilter * filter)
+static int linux_get_channel(struct netcore * filter)
 {
-	struct priv_linux * pl = netfilter_get_priv(filter);
 	struct iwreq wrq;
 	int fd, frequency;
 	int chan = 0;
@@ -674,11 +665,11 @@ static int linux_get_channel(struct netfilter * filter)
 
 	if(filter->monitor)
 	{
-	    strncpy(wrq.ifr_name, netfilter_get_monname(filter), IFNAMSIZ);
+	    strncpy(wrq.ifr_name, net_get_monname(filter), IFNAMSIZ);
     }
     else
     {
-        strncpy(wrq.ifr_name, netfilter_get_ifname(filter), IFNAMSIZ);
+        strncpy(wrq.ifr_name, net_get_ifname(filter), IFNAMSIZ);
     }
 	wrq.ifr_name[IFNAMSIZ - 1] = 0;
 
@@ -708,26 +699,26 @@ static int linux_get_channel(struct netfilter * filter)
  Function:		linux_set_channel
  Descroption:	 
  Input: 
-	1.netfilter * filter
+	1.net * filter
 	2.channel
  Output: 
  Return: 	
  Other:  
 *************************************************/
-static int linux_set_channel(struct netfilter * filter, int channel)
+static int linux_set_channel(struct netcore * filter, int channel)
 {
-	struct priv_linux * pl = netfilter_get_priv(filter);
+	struct priv_linux * pl = net_get_priv(filter);
 	struct iwreq wrq;
     int fd = linux_fd(filter);
 
 	memset(&wrq, 0, sizeof(struct iwreq));
 	if(filter->monitor)
 	{
-	    strncpy(wrq.ifr_name, netfilter_get_monname(filter), IFNAMSIZ);
+	    strncpy(wrq.ifr_name, net_get_monname(filter), IFNAMSIZ);
     }
     else
     {
-        strncpy(wrq.ifr_name, netfilter_get_ifname(filter), IFNAMSIZ);
+        strncpy(wrq.ifr_name, net_get_ifname(filter), IFNAMSIZ);
     }
 	wrq.ifr_name[IFNAMSIZ - 1] = 0;
 
@@ -753,7 +744,7 @@ static int linux_set_channel(struct netfilter * filter, int channel)
  Function:		linux_read
  Descroption:	 
  Input: 
-	1.netfilter * filter
+	1.net * filter
 	2.char * buf
 	3.count
 	4.rx_info * ri
@@ -761,9 +752,9 @@ static int linux_set_channel(struct netfilter * filter, int channel)
  Return: 	
  Other:  
 *************************************************/
-static int linux_read(struct netfilter * filter, unsigned char * buf, int count, struct rx_info * ri)
+static int linux_read(struct netcore * filter, unsigned char * buf, int count, struct rx_info * ri)
 {
-	struct priv_linux * dev = netfilter_get_priv(filter);
+	struct priv_linux * dev = net_get_priv(filter);
 	unsigned char tmpbuf[4096];
 
 	int caplen, n, got_signal, got_noise, got_channel, fcs_removed;
@@ -964,16 +955,13 @@ static int linux_read(struct netfilter * filter, unsigned char * buf, int count,
  Return: 	
  Other:  
 *************************************************/
-static int openraw(struct netfilter * filter, char * iface, int fd, int * arptype, unsigned char * mac)
+static int openraw(struct netcore * filter, char * iface, int fd, int * arptype, unsigned char * mac)
 {
 	struct ifreq ifr;
-	struct ifreq ifr2;
 	struct iwreq wrq;
-	struct iwreq wrq2;
 	struct packet_mreq mr;
 	struct sockaddr_ll sll;
-	struct sockaddr_ll sll2;
-    struct priv_linux * dev = netfilter_get_priv(filter);
+    struct priv_linux * dev = net_get_priv(filter);
 
 	if (iface == NULL || strlen(iface) >= sizeof(ifr.ifr_name))
 	{
@@ -1111,12 +1099,12 @@ static int openraw(struct netfilter * filter, char * iface, int fd, int * arptyp
  Function:		do_linux_open
  Descroption:	 
  Input: 
-	1.netfilter * filter
+	1.net * filter
  Output: 
  Return: 	
  Other:  
 *************************************************/
-static int do_linux_open(struct netfilter * filter)
+static int do_linux_open(struct netcore * filter)
 {
     struct priv_linux *dev = (struct priv_linux *)filter->priv;   
 
@@ -1138,9 +1126,11 @@ static int do_linux_open(struct netfilter * filter)
 		LOGE(_LOG_DRIVER_,"socket(PF_PACKET) failed");
 		return -1;
 	}
-
-	nl80211_set_monitor(filter);    
-    openraw(filter, netfilter_get_monname(filter), dev->fd_in, &dev->arptype_in, dev->mac);
+    if(-1 == find_monitor_mon())
+    {
+	    nl80211_set_monitor(filter);    
+    }
+    openraw(filter, net_get_monname(filter), dev->fd_in, &dev->arptype_in, dev->mac);
     
     return 0;
 }
@@ -1149,12 +1139,12 @@ static int do_linux_open(struct netfilter * filter)
  Function:		do_linux_close
  Descroption:	 
  Input: 
-	1.netfilter * filter
+	1.net * filter
  Output: 
  Return: 	
  Other:  
 *************************************************/
-static int do_linux_close(struct netfilter * filter)
+static int do_linux_close(struct netcore * filter)
 {
     struct priv_linux *dev = (struct priv_linux *)filter->priv;   
 
@@ -1186,37 +1176,18 @@ static int do_linux_close(struct netfilter * filter)
  Function:		linux_close_nl80211
  Descroption:	 
  Input: 
-	1.netfilter * filter
+	1.net * filter
  Output: 
  Return: 	
  Other:  
 *************************************************/
-static void linux_close_nl80211(struct netfilter * filter)
+static void linux_close_nl80211(struct netcore * filter)
 {
-    struct nl80211_state * nl80211 = (struct nl80211_state *)netfilter_get_nl80211(filter);
+    struct nl80211_state * nl80211 = (struct nl80211_state *)net_get_nl80211(filter);
 	nl80211_cleanup(nl80211);
     free(nl80211);
     nl80211 = NULL;
     do_linux_close(filter);
-}
-
-void imrotate(char* src, int width, int height)
-{
-	int i,j;
-	int maxindex = width*height;
-	int index = 0;
-	char *buf = malloc((sizeof(char)*maxindex));
-	if(buf)
-	{
-		for(i = 0; i < height; i++)
-		{
-			for(j = 0; j < width; j++)
-			{
-				buf[(j+1)*height-i-1] = src[j+i*width];
-			}
-		}
-	}
-	memcpy(src,buf,maxindex);
 }
 
 /*************************************************
@@ -1228,10 +1199,10 @@ void imrotate(char* src, int width, int height)
  Return: 	
  Other:  
 *************************************************/
-static struct netfilter * linux_open(char * iface)
+struct netcore * linux_open(char * iface)
 {
     struct nl80211_state* nl80211 = NULL;
-    struct netfilter * mnetfilter = NULL;
+    struct netcore * mnet = NULL;
     struct priv_linux* mPrvLinux = NULL;
 
 	if (iface == NULL)
@@ -1253,8 +1224,8 @@ static struct netfilter * linux_open(char * iface)
         return NULL;
     }
     
-	mnetfilter = (struct netfilter *)malloc(sizeof(struct netfilter));
-	if (!mnetfilter) 
+	mnet = (struct  netcore *)malloc(sizeof(struct  netcore));
+	if (!mnet) 
     {
         free(mPrvLinux);
         mPrvLinux = NULL;
@@ -1263,120 +1234,39 @@ static struct netfilter * linux_open(char * iface)
         nl80211 = NULL;
         return NULL;
     }
-    memset(mnetfilter, 0, (sizeof(struct netfilter)));
-    mnetfilter->n80211 = (void*)nl80211;
-    mnetfilter->priv = (void*)mPrvLinux;
-    mnetfilter->debug = 1;
-    sprintf(mnetfilter->interface,"%s",iface);
+    memset(mnet, 0, (sizeof(struct  netcore)));
+    mnet->n80211 = (void*)nl80211;
+    mnet->priv = (void*)mPrvLinux;
+    mnet->debug = 1;
+    sprintf(mnet->interface,"%s",iface);
 
     #ifdef CONFIG_LIBNL
 	nl80211_init(nl80211);
     #endif 
-    
-    mnetfilter->wi_close = linux_close_nl80211;
-    mnetfilter->wi_set_monitor = nl80211_set_monitor;
-    mnetfilter->wi_get_monitor = linux_get_monitor;
-    mnetfilter->wi_set_freq = linux_set_freq;
-    mnetfilter->wi_get_freq = linux_get_freq;
-    mnetfilter->wi_get_mac = linux_get_mac;    
-    mnetfilter->wi_set_mac = linux_set_mac;    
-    mnetfilter->wi_set_rate = linux_set_rate;    
-    mnetfilter->wi_get_rate = linux_get_rate;    
-    mnetfilter->wi_set_txpower = linux_set_txpower;      
-    mnetfilter->wi_get_txpower = linux_get_txpower;     
-    mnetfilter->wi_set_channel = linux_set_channel;      
-    mnetfilter->wi_get_channel = linux_get_channel;   
-    mnetfilter->wi_read = linux_read;
 
-    
-    if(0 != do_linux_open(mnetfilter))
+    mnet->wi_get_fd = linux_fd;
+    mnet->wi_close = linux_close_nl80211;
+    mnet->wi_set_monitor = nl80211_set_monitor;
+    mnet->wi_get_monitor = linux_get_monitor;
+    mnet->wi_set_freq = linux_set_freq;
+    mnet->wi_get_freq = linux_get_freq;
+    mnet->wi_get_mac = linux_get_mac;    
+    mnet->wi_set_mac = linux_set_mac;    
+    mnet->wi_set_rate = linux_set_rate;    
+    mnet->wi_get_rate = linux_get_rate;    
+    mnet->wi_set_txpower = linux_set_txpower;      
+    mnet->wi_get_txpower = linux_get_txpower;     
+    mnet->wi_set_channel = linux_set_channel;      
+    mnet->wi_get_channel = linux_get_channel;   
+    mnet->wi_read = linux_read;
+
+    if(0 != do_linux_open(mnet))
     {
-        linux_close_nl80211(mnetfilter);
-        do_linux_close(mnetfilter);
+        linux_close_nl80211(mnet);
+        do_linux_close(mnet);
         return NULL;
     }
 
-    int freq = linux_get_freq(mnetfilter);
-    LOGD(_LOG_DRIVER_,"linux_get_freq ============== [%d]",freq);
-    int ret = linux_get_mac(mnetfilter, NULL);
-    LOGD(_LOG_DRIVER_,"linux_get_mac ==11============ [%x:%x:%x:%x:%x:%x]",mPrvLinux->mac[0],mPrvLinux->mac[1],mPrvLinux->mac[2]
-        ,mPrvLinux->mac[3],mPrvLinux->mac[4],mPrvLinux->mac[5]);
-    ret = linux_get_monitor(mnetfilter);
-    LOGD(_LOG_DRIVER_,"linux_get_monitor ============== [%d]",ret);
-
-    int txpower = linux_get_txpower(mnetfilter);
-    LOGD(_LOG_DRIVER_,"linux_get_txpower ============== [%d]",txpower);
-
-    linux_set_channel(mnetfilter,1);
-        
-    txpower = linux_get_channel(mnetfilter);
-    LOGD(_LOG_DRIVER_,"linux_get_channel ============== [%d]",txpower);
-    
-    int caplen = 0;
-    struct timeval tv0;
-	unsigned char buffer[4096];
-	unsigned char * h80211;    
-    struct rx_info ri;    
-    int fdh = 0;
-    #if 0    
-    while(1)
-    {
-        fd_set rfds;
-        FD_ZERO(&rfds);
-        FD_SET(linux_fd(mnetfilter), &rfds);
-        fdh = linux_fd(mnetfilter);
-        tv0.tv_sec = 0;
-        tv0.tv_usec = 0;
-        
-        if (select((fdh + 1), &rfds, NULL, NULL, &tv0) < 0)
-        {
-            continue;
-        }
-        memset(buffer, 0, sizeof(buffer));
-		h80211 = buffer;
-		caplen = linux_read(mnetfilter, h80211, sizeof(buffer), &ri);
-		dump_add_packet(h80211,caplen, &ri);        
-    }
-    #endif
-    int i;
-    char  buf[15] = {0};
-    for(i = 0; i < 15; i++)
-    {
-        buf[i] = i+1;
-        LOGD(_LOG_DRIVER_,"%d",buf[i]);
-        if((i+1)%5 == 0)
-        {
-            LOGD(_LOG_DRIVER_,"\n");    
-        }
-    }
-    
-    imrotate(buf, 5, 3);
-     for(i = 0; i < 15; i++)
-      {
-        LOGD(_LOG_DRIVER_,"%d",buf[i]);
-        if((i+1)%3 == 0)
-        {
-            LOGD(_LOG_DRIVER_,"\n");    
-        }
-    }
-      
-    
-    
-    
-    return mnetfilter;
-}
-
-/*************************************************
- Function:		netfilter_open
- Descroption:	 
- Input: 
-	1.* iface
- Output: 
- Return: 	
- Other:  
-*************************************************/
-struct netfilter * netfilter_open(char * iface) 
-{     
-    return linux_open(iface);
+    return mnet;
 }
 

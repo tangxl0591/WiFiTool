@@ -6,5 +6,5 @@ ADD_LIBRARY(airdump STATIC ${AIRDUMP_SRC_LIST})
 
 set(CMAKE_C_FLAGS "-fPIC ${CMAKE_C_FLAGS}") 
 
-TARGET_LINK_LIBRARIES(airdump -llog) 
+#TARGET_LINK_LIBRARIES(airdump -llog) 
 

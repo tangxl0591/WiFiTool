@@ -9,12 +9,14 @@
 
 INCLUDE_DIRECTORIES(${WiFiTool_SOURCE_DIR}/include) 
 INCLUDE_DIRECTORIES(${WiFiTool_SOURCE_DIR}/include/config) 
-INCLUDE_DIRECTORIES(${WiFiTool_SOURCE_DIR}/include/core) 
 INCLUDE_DIRECTORIES(${WiFiTool_SOURCE_DIR}/include/platform) 
-INCLUDE_DIRECTORIES(${WiFiTool_SOURCE_DIR}/library/libnetfilter) 
+INCLUDE_DIRECTORIES(${WiFiTool_SOURCE_DIR}/filter) 
+INCLUDE_DIRECTORIES(${WiFiTool_SOURCE_DIR}/library/libnetcore) 
+INCLUDE_DIRECTORIES(${WiFiTool_SOURCE_DIR}/library/libfiltercore) 
 INCLUDE_DIRECTORIES(${WiFiTool_SOURCE_DIR}/library/liblog) 
 INCLUDE_DIRECTORIES(${WiFiTool_SOURCE_DIR}/library/libradiotap) 
 INCLUDE_DIRECTORIES(${WiFiTool_SOURCE_DIR}/library/libairdump) 
+INCLUDE_DIRECTORIES(${WiFiTool_SOURCE_DIR}/library/libutils) 
 INCLUDE_DIRECTORIES(${WiFiTool_SOURCE_DIR}/third_party/libnl/include)
 
 ######################################################
@@ -30,6 +32,8 @@ SET(EXECUTABLE_OUTPUT_PATH ${LIBS_PATH})
 
 SET(CMAKE_C_FLAGS ${COMMON_CFLAGS})
 SET(CMAKE_CXX_FLAGS ${COMMON_CFLAGS})
+
+add_definitions("-Wall -g")
 
 link_directories(${WiFiTool_SOURCE_DIR}/third_party/libnl/lib) 
 

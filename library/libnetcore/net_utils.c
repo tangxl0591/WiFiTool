@@ -1,6 +1,6 @@
 /*********************************************************
  Copyright (C),2015-2021,Electronic Technology Co.,Ltd.
- File name: 		utils.c
+ File name: 		net_utils.c
  Author: 			Txl
  Version: 			1.0
  Date: 				2018-10-17
@@ -12,8 +12,8 @@
  	 Modification:  Created file
  	 
 *********************************************************/
-#include "netfilter.h"
-#include "netfilter_utils.h"
+#include "net_core.h"
+#include "net_utils.h"
 #include "crctable_osdep.h"
 
 /*************************************************
@@ -81,7 +81,7 @@ int getChannelFromFrequency(int frequency)
 
 
 /*************************************************
- Function:		netfilter_phy_lookup_index
+ Function:		net_phy_lookup_index
  Descroption:	 
  Input: 
 	1.*name
@@ -89,7 +89,7 @@ int getChannelFromFrequency(int frequency)
  Return: 	
  Other:  
 *************************************************/
-int netfilter_phy_lookup_index(char *name)
+int net_phy_lookup_index(char *name)
 {
 	char buf[200];
 	int fd, pos;
@@ -110,7 +110,7 @@ int netfilter_phy_lookup_index(char *name)
 }
 
 /*************************************************
- Function:		netfilter_name_lookup_index
+ Function:		net_name_lookup_index
  Descroption:	 
  Input: 
 	1.*name
@@ -118,43 +118,43 @@ int netfilter_phy_lookup_index(char *name)
  Return: 	
  Other:  
 *************************************************/
-int netfilter_name_lookup_index(char *name)
+int net_name_lookup_index(char *name)
 {
     return if_nametoindex(name);
 }
 
 /*************************************************
- Function:		netfilter_get_priv
+ Function:		net_get_priv
  Descroption:	 
  Input: 
-	1.netfilter* filter
+	1.net* filter
  Output: 
  Return: 	
  Other:  
 *************************************************/
-void * netfilter_get_priv(void* filter) 
+void * net_get_priv(void* filter) 
 {   
-    struct netfilter* handler = (struct netfilter*)filter;
+    struct netcore* handler = (struct netcore*)filter;
     return handler->priv; 
 }
 
 /*************************************************
- Function:		netfilter_get_nl80211
+ Function:		net_get_nl80211
  Descroption:	 
  Input: 
-	1.netfilter* filter
+	1.net* filter
  Output: 
  Return: 	
  Other:  
 *************************************************/
-void * netfilter_get_nl80211(void* filter) 
+void * net_get_nl80211(void* filter) 
 {
-    struct netfilter* handler = (struct netfilter*)filter;
+    struct netcore* handler = (struct netcore*)filter;
     return handler->n80211; 
 }
 
 /*************************************************
- Function:		netfilter_get_ifname
+ Function:		net_get_ifname
  Descroption:	 
  Input: 
 	1.filter
@@ -162,14 +162,14 @@ void * netfilter_get_nl80211(void* filter)
  Return: 	
  Other:  
 *************************************************/
-char * netfilter_get_ifname(void* filter) 
+char * net_get_ifname(void* filter) 
 {
-    struct netfilter* handler = (struct netfilter*)filter;
+    struct netcore* handler = (struct netcore*)filter;
     return handler->interface;
 }
 
 /*************************************************
- Function:		netfilter_get_ifname
+ Function:		net_get_ifname
  Descroption:	 
  Input: 
 	1.filter
@@ -177,13 +177,13 @@ char * netfilter_get_ifname(void* filter)
  Return: 	
  Other:  
 *************************************************/
-char * netfilter_get_monname(void* filter) 
+char * net_get_monname(void* filter) 
 {
     return MONITOR_NAME;
 }
 
 /*************************************************
- Function:		netfilter_get_name
+ Function:		net_get_name
  Descroption:	 
  Input: 
 	1.filter
@@ -191,15 +191,15 @@ char * netfilter_get_monname(void* filter)
  Return: 	
  Other:  
 *************************************************/
-char * netfilter_get_name(void* filter) 
+char * net_get_name(void* filter) 
 {
-    struct netfilter* handler = (struct netfilter*)filter;
+    struct netcore* handler = (struct netcore*)filter;
     if(handler->monitor)
     {
-        return netfilter_get_monname(filter);
+        return net_get_monname(filter);
     }
     
-    return netfilter_get_ifname(filter);
+    return net_get_ifname(filter);
 }
 
 /*************************************************
@@ -243,5 +243,19 @@ int check_crc_buf_osdep(unsigned char * buf, int len)
 	return (((crc) &0xFF) == buf[0] && ((crc >> 8) & 0xFF) == buf[1]
 			&& ((crc >> 16) & 0xFF) == buf[2]
 			&& ((crc >> 24) & 0xFF) == buf[3]);
+}
+
+
+/*************************************************
+ Function:		find_monitor_mon
+ Descroption:	 
+ Input: 		None
+ Output: 
+ Return: 	
+ Other:  
+*************************************************/
+int find_monitor_mon(void)
+{
+    return u_fileexist("/sys/class/net/Newland");    
 }
 

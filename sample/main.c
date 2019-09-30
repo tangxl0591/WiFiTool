@@ -14,8 +14,7 @@
 *********************************************************/
 #include "config.h"
 #include "log.h"
-#include "netfilter.h"
-
+#include "filter.h"
 
 /*************************************************
  Function:		main
@@ -29,13 +28,16 @@
 *************************************************/
 int main(int argc,char *argv[])  
 { 
-    int i = 10;
     LOGI(_LOG_LOGIC_, "**************************************************");
     LOGI(_LOG_LOGIC_, "Build Version: %s",_BUILD_VERSION_);
     LOGI(_LOG_LOGIC_, "Build Time   : %s",_BUILD_TIME_);
     LOGI(_LOG_LOGIC_, "**************************************************");    
 
-    netfilter_init();
+    module_init();
+    while(1)
+    {
+        sleep(1);
+    }
     
     return 0;
 }

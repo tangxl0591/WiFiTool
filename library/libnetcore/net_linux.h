@@ -1,6 +1,6 @@
 /*********************************************************
  Copyright (C),2015-2021,Electronic Technology Co.,Ltd.
- File name: 		netfilter_linux.h
+ File name: 		net_linux.h
  Author: 			Txl
  Version: 			1.0
  Date: 				2018-12-27
@@ -12,11 +12,11 @@
  	 Modification:  Created file
  	 
 *********************************************************/
-#ifndef _NETFILTER_LINUX_H_
-#define _NETFILTER_LINUX_H_
+#ifndef _NET_LINUX_H_
+#define _NET_LINUX_H_
 
-#include "netfilter.h"
-#include "netfilter_utils.h"
+#include "net_core.h"
+#include "net_utils.h"
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -60,17 +60,16 @@ struct priv_linux
 #define NULL_MAC "\x00\x00\x00\x00\x00\x00"
 #endif
 
-
 /*************************************************
- Function:		netfilter_open
+ Function:		linux_open
  Descroption:	 
  Input: 
-	1.* iface
+	1.iface
  Output: 
  Return: 	
  Other:  
 *************************************************/
-struct netfilter * netfilter_open(char * iface);
+struct netcore * linux_open(char * iface);
 
 #ifdef __cplusplus
 #if __cplusplus
@@ -78,5 +77,5 @@ struct netfilter * netfilter_open(char * iface);
 #endif
 #endif
 
-#endif /* ifndef _NETFILTER_LINUX_H_ Edit By Txl 2018-12-27 */
+#endif /* ifndef _NET_LINUX_H_ Edit By Txl 2018-12-27 */
 

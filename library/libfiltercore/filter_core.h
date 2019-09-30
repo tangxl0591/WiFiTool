@@ -31,7 +31,7 @@ extern "C" {
 
 #define __ms_malloc	        malloc
 #define ms_realloc	        realloc
-#define ms_free		        free
+#define __ms_free		    free
 #define ms_strdup	        strdup
 #define ms_strndup	        strndup
 #define ms_new(type,count)	(type*)__ms_malloc(sizeof(type)*(count))
@@ -162,6 +162,24 @@ struct _MSFilterDesc{
 
 typedef struct _MSFilterDesc MSFilterDesc;
 
+#define MS_FILTER_METHOD_ID(_id_,_cnt_,_argsize_) \
+	(  (((unsigned long)(_id_)) & 0xFFFF)<<16 | (_cnt_<<8) | (_argsize_ & 0xFF ))
+
+#define MS_FILTER_METHOD(_id_,_count_,_argtype_) \
+	MS_FILTER_METHOD_ID(_id_,_count_,sizeof(_argtype_))
+
+#define MS_FILTER_METHOD_NO_ARG(_id_,_count_) \
+	MS_FILTER_METHOD_ID(_id_,_count_,0)
+
+#define MS_FILTER_EVENT(_id_,_count_,_argtype_) \
+	MS_FILTER_METHOD_ID(_id_,_count_,sizeof(_argtype_))
+
+#define MS_FILTER_EVENT_NO_ARG(_id_,_count_)\
+	MS_FILTER_METHOD_ID(_id_,_count_,0)
+
+#define MS_FILTER_METHOD_GET_FID(id)	(((id)>>16) & 0xFFFF)
+#define MS_FILTER_METHOD_GET_INDEX(id) ( ((id)>>8) & 0XFF) 
+
 /*************************************************
   Function:		ms_free
   Description: 	
@@ -170,7 +188,7 @@ typedef struct _MSFilterDesc MSFilterDesc;
   Return:		 
   Others:
 *************************************************/
-void ms_free(void * data);
+void ms_free(void * userdata);
 
 /*************************************************
   Function:		ms_list_new
@@ -411,27 +429,6 @@ void ms_module_register(MSFilterDesc *desc);
   Others:
 *************************************************/
 void ms_module_unregister_all(void);
-
-/*************************************************
-  Function:		ms_module_init
-  Description: 	
-  Input: 		
-  Output:		
-  Return:		 
-  Others:
-*************************************************/
-void ms_module_init(void);
-
-/*************************************************
-  Function:		ms_module_exit
-  Description: 	
-  Input: 		
-  Output:		
-  Return:		 
-  Others:
-*************************************************/
-void ms_module_exit(void);
-
 
 #ifdef __cplusplus
 #if __cplusplus

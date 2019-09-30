@@ -34,7 +34,6 @@
 
 #include "eapol.h"
 #include "pcap.h"
-#include "netfilter.h"
 
 /* some constants */
 
@@ -111,7 +110,6 @@ get_manufacturer(unsigned char mac0, unsigned char mac1, unsigned char mac2);
 #define AIRODUMP_NG_CAP_EXT "cap"
 
 #define NB_EXTENSIONS 6
-
 #define MIN_RAM_SIZE_LOAD_OUI_RAM 32768
 
 /* linked list of received packets for the last few seconds */
@@ -129,8 +127,7 @@ struct oui
 	char id[9]; /* TODO: Don't use ASCII chars to compare, use unsigned char[3]
 				   (later) with the value (hex ascii will have to be converted)
 				   */
-	char
-		manuf[128]; /* TODO: Switch to a char * later to improve memory usage */
+	char manuf[128]; /* TODO: Switch to a char * later to improve memory usage */
 	struct oui * next;
 };
 
@@ -316,7 +313,7 @@ struct NA_info
 };
 /* bunch of global stuff */
 
-struct Globals
+struct globals
 {
 	struct AP_info *ap_1st, *ap_end;
 	struct ST_info *st_1st, *st_end;

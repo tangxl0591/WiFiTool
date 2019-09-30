@@ -25,12 +25,12 @@ static MSList *desc_list=NULL;
   Return:		 
   Others:
 *************************************************/
-void ms_free(void * data)
+void ms_free(void * userdata)
 {
-	if (data)
+	if (userdata)
 	{
-		free(data);
-		data = NULL;
+		__ms_free(userdata);
+		userdata = NULL;
 	}
 }
 
@@ -205,7 +205,6 @@ static int ms_queue_init(MSFilterDesc *f)
 {
 	ms_return_val_if_fail(f, -1);
 	
-	int i;
 	ms_queue_lock(f);
     LIST_INIT(&f->queue);
 	ms_queue_unlock(f);
@@ -337,7 +336,6 @@ static int ms_queue_pop(MSFilterDesc *f)
 *************************************************/
 static void *ms_process_thread(void *ptr)
 {
-    char Cmd[100];
 	MSFilterDesc *f = (MSFilterDesc *)ptr;
 	mblk_t arg;
 	mblk_t *arg1;
@@ -855,35 +853,4 @@ void ms_module_unregister_all(void)
 		ms_list_free(desc_list);
 	}
 }
-
-/*************************************************
-  Function:		ms_module_init
-  Description: 	
-  Input: 		
-  Output:		
-  Return:		 
-  Others:
-*************************************************/
-void ms_module_init(void)
-{
-//	int i;
-//	for (i = 0; ms_module_descs[i] != NULL; i++)
-//	{
-//		ms_module_register(ms_module_descs[i]);
-//	}
-}
-
-/*************************************************
-  Function:		ms_module_exit
-  Description: 	
-  Input: 		
-  Output:		
-  Return:		 
-  Others:
-*************************************************/
-void ms_module_exit(void)
-{
-	ms_module_unregister_all();
-}
-
 

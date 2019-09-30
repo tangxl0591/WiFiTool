@@ -1,5 +1,6 @@
 ADD_SUBDIRECTORY(liblog) 
+ADD_SUBDIRECTORY(libutils) 
 ADD_SUBDIRECTORY(libradiotap) 
 ADD_SUBDIRECTORY(libairdump)
-ADD_SUBDIRECTORY(libnetfilter) 
-
+ADD_SUBDIRECTORY(libnetcore) 
+ADD_SUBDIRECTORY(libfiltercore) 

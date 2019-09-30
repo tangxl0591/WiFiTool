@@ -112,7 +112,6 @@ void log_write(unsigned int level,const char *fmt, ...);
 #define LOG(level,color,...) \
         log_write(level,__VA_ARGS__);\
         if(log_get_level()&level) { \
-			struct timeval _log_time; \
 			printf(color"["LOG_TAG"]: "); \
 			printf(__VA_ARGS__);printf("\n");\
             printf(COLOR_WHITE);}   
